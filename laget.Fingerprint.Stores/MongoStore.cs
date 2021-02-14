@@ -5,8 +5,7 @@ using MongoDB.Driver;
 
 namespace laget.Fingerprint.Stores
 {
-
-    public class MongoStore : IStore
+    public class MongoStore<T> : IStore where T : IFingerprint
     {
         private readonly IMongoCollection<IFingerprint> _collection;
         private readonly TimeSpan? _ttl;
@@ -27,7 +26,7 @@ namespace laget.Fingerprint.Stores
                 WriteConcern = WriteConcern.Acknowledged
             });
 
-            _collection = database.GetCollection<IFingerprint>($"{nameof(IFingerprint).ToLower()}.fingerprints");
+            _collection = database.GetCollection<IFingerprint>($"{typeof(T).Name.ToLower()}.fingerprints");
             _ttl = ttl;
 
             EnsureIndexes();
@@ -64,6 +63,8 @@ namespace laget.Fingerprint.Stores
 
             return _collection.FindSync(filter).Any();
         }
+
+        public IEnumerable<IFingerprint> Items => _collection.Find(_ => true).ToList();
 
         private void EnsureIndexes()
         {
