@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using laget.Fingerprint.Interfaces;
 using MongoDB.Driver;
 
 namespace laget.Fingerprint.Stores
@@ -7,19 +8,15 @@ namespace laget.Fingerprint.Stores
 
     public class MongoStore : IStore
     {
-        private readonly IMongoCollection<Models.IFingerprint> _store;
+        private readonly IMongoCollection<IFingerprint> _collection;
+        private readonly TimeSpan? _ttl;
 
         public MongoStore(MongoUrl url)
-            : this(url, TimeSpan.FromHours(1), "calls")
+            : this(url, null)
         {
         }
 
-        public MongoStore(MongoUrl url, TimeSpan ttl)
-            : this(url, ttl, "calls")
-        {
-        }
-
-        public MongoStore(MongoUrl url, TimeSpan ttl, string collection = "calls")
+        public MongoStore(MongoUrl url, TimeSpan? ttl)
         {
             var client = new MongoClient(url);
 
@@ -30,39 +27,58 @@ namespace laget.Fingerprint.Stores
                 WriteConcern = WriteConcern.Acknowledged
             });
 
-            _store = database.GetCollection<Models.Fingerprint>(collection);
+            _collection = database.GetCollection<IFingerprint>($"{nameof(IFingerprint).ToLower()}.fingerprints");
+            _ttl = ttl;
 
             EnsureIndexes();
         }
 
-        private void EnsureIndexes()
+        public void Add(IFingerprint model)
         {
-            var builder = Builders<Models.Fingerprint>.IndexKeys;
-            var indexes = new List<CreateIndexModel<Models.Fingerprint>>
-            {
-                new CreateIndexModel<Models.Fingerprint>(builder.Ascending(_ => _.Hash), new CreateIndexOptions { Background = true, Unique = true })
-            };
-            _store.Indexes.CreateMany(indexes);
+            var options = new ReplaceOptions { IsUpsert = true };
+            var builder = Builders<IFingerprint>.Filter;
+            var filter = builder.Eq(x => x.Hash, model.Hash);
+
+            _collection.ReplaceOne(filter, model, options);
         }
 
-        public void Add(Models.Fingerprint model)
+        public IFingerprint Get(string hash)
         {
-            throw new NotImplementedException();
-        }
+            var builder = Builders<IFingerprint>.Filter;
+            var filter = builder.Eq(x => x.Hash, hash);
 
-        public Models.Fingerprint Get(string hash)
-        {
-            throw new NotImplementedException();
+            return _collection.Find(filter).FirstOrDefault();
         }
 
         public void Remove(string hash)
         {
-            throw new NotImplementedException();
+            var filter = Builders<IFingerprint>.Filter.Eq(x => x.Hash, hash);
+
+            _collection.DeleteOne(filter);
         }
 
         public bool Exists(string hash)
         {
-            throw new NotImplementedException();
+            var builder = Builders<IFingerprint>.Filter;
+            var filter = builder.Eq(x => x.Hash, hash);
+
+            return _collection.FindSync(filter).Any();
+        }
+
+        private void EnsureIndexes()
+        {
+            var builder = Builders<IFingerprint>.IndexKeys;
+            var indexes = new List<CreateIndexModel<IFingerprint>>
+            {
+                new CreateIndexModel<IFingerprint>(builder.Ascending(_ => _.Hash), new CreateIndexOptions { Background = true, Unique = true })
+            };
+
+            if(_ttl != null)
+            {
+                indexes.Add(new CreateIndexModel<IFingerprint>(builder.Ascending(_ => _.CreatedAt), new CreateIndexOptions { Background = true, ExpireAfter = _ttl }));
+            }
+
+            _collection.Indexes.CreateMany(indexes);
         }
     }
 }
