@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using laget.Fingerprint.Interfaces;
 using MongoDB.Driver;
 
 namespace laget.Fingerprint.Stores
 {
-    public class MongoStore<TFingerprint, TCollection> : IStore<TFingerprint> where TFingerprint : IFingerprint
+    public class MongoStore<TFingerprint, TEntity> : IStore<TFingerprint> where TFingerprint : IFingerprint
     {
         private readonly IMongoCollection<TFingerprint> _collection;
         private readonly TimeSpan? _ttl;
@@ -26,7 +27,7 @@ namespace laget.Fingerprint.Stores
                 WriteConcern = WriteConcern.Acknowledged
             });
 
-            _collection = database.GetCollection<TFingerprint>($"{typeof(TCollection).Name.ToLower()}.fingerprints");
+            _collection = database.GetCollection<TFingerprint>($"{typeof(TEntity).Name.ToLower()}.fingerprints");
             _ttl = ttl;
 
             EnsureIndexes();
@@ -41,12 +42,29 @@ namespace laget.Fingerprint.Stores
             _collection.ReplaceOne(filter, model, options);
         }
 
+        public async Task AddAsync(TFingerprint model)
+        {
+            var options = new ReplaceOptions { IsUpsert = true };
+            var builder = Builders<TFingerprint>.Filter;
+            var filter = builder.Eq(x => x.Hash, model.Hash);
+
+            await _collection.ReplaceOneAsync(filter, model, options);
+        }
+
         public TFingerprint Get(string hash)
         {
             var builder = Builders<TFingerprint>.Filter;
             var filter = builder.Eq(x => x.Hash, hash);
 
             return _collection.Find(filter).FirstOrDefault();
+        }
+
+        public async Task<TFingerprint> GetAsync(string hash)
+        {
+            var builder = Builders<TFingerprint>.Filter;
+            var filter = builder.Eq(x => x.Hash, hash);
+
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
         public void Remove(string hash)
@@ -56,12 +74,27 @@ namespace laget.Fingerprint.Stores
             _collection.DeleteOne(filter);
         }
 
+        public async Task RemoveAsync(string hash)
+        {
+            var filter = Builders<TFingerprint>.Filter.Eq(x => x.Hash, hash);
+
+            await _collection.DeleteOneAsync(filter);
+        }
+
         public bool Exists(string hash)
         {
             var builder = Builders<TFingerprint>.Filter;
             var filter = builder.Eq(x => x.Hash, hash);
 
             return _collection.FindSync(filter).Any();
+        }
+
+        public async Task<bool> ExistsAsync(string hash)
+        {
+            var builder = Builders<TFingerprint>.Filter;
+            var filter = builder.Eq(x => x.Hash, hash);
+
+            return await _collection.Find(filter).AnyAsync();
         }
 
         public IEnumerable<TFingerprint> Items => _collection.Find(_ => true).ToList();

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="laget.Fingerprint" Version="1.1.16" />
+    <PackageReference Include="laget.Fingerprint" Version="1.1.18" />
     <PackageReference Include="MongoDB.Driver" Version="2.11.6" />
   </ItemGroup>
 
