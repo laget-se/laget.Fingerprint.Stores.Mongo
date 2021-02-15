@@ -8,12 +8,12 @@ MongoDB store implementation for laget.Fingerprint...
 ### Autofac
 ```c#
 public class FingerprintModule : Module
+{
+    protected override void Load(ContainerBuilder builder)
     {
-        protected override void Load(ContainerBuilder builder)
-        {
-            builder.Register<IFingerprintManager<Club>>(c =>
-                new FingerprintManager<Club>(new MongoStore<Club>(new MongoUrl(c.Resolve<IConfiguration>().GetConnectionString("MongoConnectionString"))))
-            ).SingleInstance();
-        }
+        builder.Register<IFingerprintManager<Club>>(c =>
+            new FingerprintManager<Club>(new MongoStore<Club>(new MongoUrl(c.Resolve<IConfiguration>().GetConnectionString("MongoConnectionString"))))
+        ).SingleInstance();
     }
+}
 ```
