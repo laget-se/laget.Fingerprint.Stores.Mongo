@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace laget.Fingerprint.Stores
 {
-    public class MongoStore<T> : IStore where T : IFingerprint
+    public class MongoStore<T> : IStore where T : IFingerprintable
     {
         private readonly IMongoCollection<IFingerprint> _collection;
         private readonly TimeSpan? _ttl;
