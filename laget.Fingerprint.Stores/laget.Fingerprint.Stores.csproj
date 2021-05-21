@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0;netcoreapp3.1;netcoreapp2.1;net48;net472</TargetFrameworks>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
+      <NuspecProperties>version=$(Version)</NuspecProperties>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="laget.Fingerprint" Version="1.1.20" />
+    <PackageReference Include="laget.Fingerprint" Version="1.2.2" />
     <PackageReference Include="MongoDB.Driver" Version="2.12.3" />
   </ItemGroup>
 
