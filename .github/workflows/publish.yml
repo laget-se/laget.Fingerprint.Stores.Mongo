@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch: {}
 
 jobs:
   tests:
@@ -40,9 +41,10 @@ jobs:
     - name: Build
       run: dotnet build laget.Fingerprint.Stores/laget.Fingerprint.Stores.csproj --no-restore --configuration Release
     - name: Publish
-      uses: laget-se/publish-nuget@v2.6.10
+      uses: laget-se/publish-nuget@v2.7.2
       with:
-        PROJECT_FILE_PATH: laget.Fingerprint.Stores/laget.Fingerprint.Stores.csproj
+        INCLUDE_SYMBOLS: true
         NUGET_KEY: ${{secrets.NUGET_API_KEY}}
         NUSPEC_FILE: laget.Fingerprint.Stores.Mongo.nuspec
-        VERSION_STATIC: "1.2.${{github.run_number}}"
+        PROJECT_FILE_PATH: laget.Fingerprint.Stores/laget.Fingerprint.Stores.csproj
+        VERSION_STATIC: "1.3.${{github.run_number}}"
