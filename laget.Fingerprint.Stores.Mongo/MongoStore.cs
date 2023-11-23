@@ -1,8 +1,8 @@
-﻿using System;
+﻿using laget.Fingerprint.Interfaces;
+using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using laget.Fingerprint.Interfaces;
-using MongoDB.Driver;
 
 namespace laget.Fingerprint.Stores
 {
@@ -107,7 +107,7 @@ namespace laget.Fingerprint.Stores
                 new CreateIndexModel<TFingerprint>(builder.Ascending(_ => _.Hash), new CreateIndexOptions { Background = true, Unique = true })
             };
 
-            if(_ttl != null)
+            if (_ttl != null)
             {
                 indexes.Add(new CreateIndexModel<TFingerprint>(builder.Ascending(_ => _.CreatedAt), new CreateIndexOptions { Background = true, ExpireAfter = _ttl }));
             }
