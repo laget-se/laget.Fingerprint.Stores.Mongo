@@ -16,19 +16,19 @@
     <repository type="git" url="https://github.com/laget-se/laget.Fingerprint.Stores.Mongo" branch="master" />
     <dependencies>
       <group targetFramework="net8.0">
-        <dependency id="laget.Fingerprint" version="1.2.29" />
+        <dependency id="laget.Fingerprint" version="1.2.30" />
         <dependency id="MongoDb.Driver" version="2.23.1" />
       </group>
       <group targetFramework="net6.0">
-        <dependency id="laget.Fingerprint" version="1.2.29" />
+        <dependency id="laget.Fingerprint" version="1.2.30" />
         <dependency id="MongoDb.Driver" version="2.23.1" />
       </group>
       <group targetFramework="netstandard2.1">
-        <dependency id="laget.Fingerprint" version="1.2.29" />
+        <dependency id="laget.Fingerprint" version="1.2.30" />
         <dependency id="MongoDb.Driver" version="2.23.1" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="laget.Fingerprint" version="1.2.29" />
+        <dependency id="laget.Fingerprint" version="1.2.30" />
         <dependency id="MongoDb.Driver" version="2.23.1" />
       </group>
     </dependencies>
